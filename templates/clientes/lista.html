@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Clientes - Hotel Estancia Itapúa{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-gray-800">Listado de Clientes</h1>
+
+<a href="{% url 'clientes:crear' %}" class="btn btn-success mb-3"><i class="fas fa-plus"></i> Nuevo Cliente</a>
+
+<table class="table table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>DNI</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Activo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in clientes %}
+        <tr>
+            <td>{{ c.dni }}</td>
+            <td>{{ c.nombre }} {{ c.apellido }}</td>
+            <td>{{ c.telefono }}</td>
+            <td>{{ c.email }}</td>
+            <td>
+                {% if not c.eliminado %}
+                <span class="badge bg-success">Sí</span>
+                {% else %}
+                <span class="badge bg-danger">No</span>
+                {% endif %}
+            </td>
+            <td class="text-end">
+                <div class="row-actions">
+                    <a href="{% url 'clientes:editar' c.id %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'clientes:eliminar' c.id %}" class="btn btn-sm btn-danger">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">No hay clientes registrados.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% load static %}
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Hei System{% endblock %}</title>
+    <!-- SB Admin 2 CSS -->
+    <link href="{% static 'sb-admin-2/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'sb-admin-2/css/sb-admin-2.min.css' %}" rel="stylesheet">
+    <!-- Estilo de color de plantillas -->
+    <link id="theme-stylesheet" href="{% static 'sb-admin-2/css/light-theme.css' %}" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body id="page-top" class="theme-light">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        {% include 'partials/sidebar.html' %}
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                {% include 'partials/navbar.html' %}
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    {% if messages %}
+                    <div class="mx-auto mt-2" style="max-width: 600px;">
+                        <div aria-live="polite" aria-atomic="true" class="position-relative">
+                            {% for message in messages %}
+                            <div class="toast toast-custom toast-{{ message.tags }} border-0 mb-2" role="alert"
+                                aria-live="assertive" aria-atomic="true">
+                                <div class="d-flex">
+                                    <div class="toast-body">
+                                        {{ message }}
+                                    </div>
+                                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                                        data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+
+                    {% block content %}{% endblock %}
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            {% include 'partials/footer.html' %}
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- JS -->
+    <script src="{% static 'sb-admin-2/vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'sb-admin-2/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'sb-admin-2/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+    <script src="{% static 'sb-admin-2/js/sb-admin-2.min.js' %}"></script>
+
+
+    {% block extra_js %}{% endblock %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            toastElList.forEach(function (toastEl) {
+                const toast = new bootstrap.Toast(toastEl, {
+                    delay: 6000
+                });
+                toast.show();
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block title %}Habitaciones - Hotel Estancia Itapúa{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-gray-800">Lista de Habitaciones</h1>
+
+<a href="{% url 'habitaciones:crear' %}" class="btn btn-success mb-3"><i class="fas fa-plus"></i> Nueva Habitación</a>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Tipo</th>
+                <th>Costo Diario</th>
+                <th>Disponible</th>
+                <th>Características</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for h in habitaciones %}
+            <tr>
+                <td>{{ h.numero }}</td>
+                <td>{{ h.get_tipo_display }}</td>
+                <td>{{ h.costo_diario }}</td>
+                <td class="text-center">
+                    {% if h.estado == 'disponible' %}
+                    <i class="fas fa-check-circle text-success" title="Disponible"></i>
+                    {% else %}
+                    <i class="fas fa-times-circle text-danger" title="{{ h.estado|capfirst }}"></i>
+                    {% endif %}
+                </td>
+                <td>{{ h.caracteristicas|truncatechars:50 }}</td>
+                <td class="text-end">
+                    <div class="row-actions">
+                        <a href="{% url 'habitaciones:editar' h.pk %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'habitaciones:eliminar' h.pk %}" class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No hay habitaciones registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

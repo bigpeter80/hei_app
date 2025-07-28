@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Cliente - Hotel Estancia Itapúa{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-danger">¿Confirmar eliminación?</h1>
+
+<p><strong>{{ cliente.nombre }} {{ cliente.apellido }}</strong> (DNI: {{ cliente.dni }})</p>
+
+<form method="post">
+    {% csrf_token %}
+    <a href="{% url 'clientes:listado' %}" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+</form>
+{% endblock %}

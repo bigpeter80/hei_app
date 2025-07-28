@@ -1,0 +1,130 @@
+/* === Modo Claro Moderno y Legible para HEI System === */
+
+/* === General === */
+body {
+    background-color: #f0f0f0;
+    color: #212529;
+    font-size: 16px;
+}
+
+/* === Tarjetas y contenido === */
+.card {
+    background-color: #ffffff;
+    color: #212529;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* === Navbar === */
+.navbar {
+    background-color: #e2e6ea !important; /* gris claro */
+    color: #000000 !important;
+    border-bottom: 1px solid #ced4da;
+}
+
+.navbar .nav-link,
+.navbar .navbar-brand,
+.navbar .nav-item {
+    color: #000000 !important;
+}
+
+/* === Sidebar === */
+.sidebar {
+    background-color: #dee2e6 !important; /* gris claro, un poco más oscuro que navbar */
+    border-right: 1px solid #ced4da;
+}
+
+.sidebar .nav-link,
+.sidebar .nav-link span,
+.sidebar .nav-link i {
+    color: #111111 !important; /* negro intenso */
+    font-size: 18px;
+    font-weight: 600; /* semi bold */
+}
+
+.sidebar .nav-link:hover {
+    background-color: #cfd4da !important;
+    color: #000000 !important;
+    font-weight: 700;
+}
+
+.sidebar .nav-item.active .nav-link {
+    background-color: #bfc5cb !important;
+    color: #000000 !important;
+    font-weight: 700;
+}
+
+.sidebar-logo {
+    height: 110px;
+    max-width: 90%;
+    object-fit: contain;
+    display: block;
+    margin-top: 30px;  /* Aumentar separación desde arriba */
+    margin-bottom: 8px;
+}
+/* === Footer === */
+footer.sticky-footer {
+    background-color: #f0f0f0 !important;
+    color: #212529;
+    border-top: 1px solid #dee2e6;
+    font-size: 14px;
+}
+
+/* === Tablas === */
+.table {
+    background-color: #ffffff;
+    color: #212529;
+    font-size: 15px;
+}
+
+.table thead {
+    background-color: #e9ecef;
+    color: #212529;
+}
+
+.table-bordered th,
+.table-bordered td {
+    border-color: #ced4da;
+}
+
+/* === Botones === */
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #ffffff;
+    font-size: 15px;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* === Enlaces === */
+a,
+a:hover {
+    color: #0d6efd;
+    font-size: 15px;
+}
+
+/* === Formularios === */
+input, select, textarea {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+    color: #000;
+}
+
+label {
+    color: #000 !important;
+    font-weight: 500;
+}
+
+/* === Errores === */
+.text-danger,
+.errorlist li {
+    color: #000000 !important;
+}
