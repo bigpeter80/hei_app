@@ -13,9 +13,9 @@
             <div class="alert alert-danger">
                 <ul class="mb-0">
                     {% for field in form %}
-                    {% for error in field.errors %}
-                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-                    {% endfor %}
+                        {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %}
                     {% endfor %}
                     {% for error in form.non_field_errors %}
                     <li>{{ error }}</li>
@@ -25,28 +25,47 @@
         </div>
         {% endif %}
 
-
         <form method="post" class="mx-auto w-100" style="max-width: 600px;">
             {% csrf_token %}
+
             <div class="mb-3">
                 <label for="id_dni" class="form-label">DNI</label>
-                {{ form.dni|add_class:"form-control" |attr:"autofocus" }}
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                    {{ form.dni|add_class:"form-control"|attr:"autofocus" }}
+                </div>
             </div>
+
             <div class="mb-3">
                 <label for="id_nombre" class="form-label">Nombre</label>
-                {{ form.nombre|add_class:"form-control" }}
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    {{ form.nombre|add_class:"form-control" }}
+                </div>
             </div>
+
             <div class="mb-3">
                 <label for="id_apellido" class="form-label">Apellido</label>
-                {{ form.apellido|add_class:"form-control" }}
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                    {{ form.apellido|add_class:"form-control" }}
+                </div>
             </div>
+
             <div class="mb-3">
                 <label for="id_telefono" class="form-label">Teléfono</label>
-                {{ form.telefono|add_class:"form-control" }}
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                    {{ form.telefono|add_class:"form-control" }}
+                </div>
             </div>
+
             <div class="mb-3">
                 <label for="id_email" class="form-label">Email</label>
-                {{ form.email|add_class:"form-control" }}
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    {{ form.email|add_class:"form-control" }}
+                </div>
             </div>
 
             <div class="d-flex justify-content-between">

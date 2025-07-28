@@ -2,15 +2,17 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
 from django.db.models import Q
+from django.template.loader import render_to_string
+from django.http import JsonResponse
 from .models import Cliente
 from .forms import ClienteForm
 
+#obtiene el listado de clientes
 @login_required
 def cliente_lista(request):
     query = request.GET.get('q')
-    clientes = Cliente.objects.all()  # Mostrar todos, incluso los eliminados
+    clientes = Cliente.objects.all()
 
     if query:
         clientes = clientes.filter(
@@ -20,19 +22,21 @@ def cliente_lista(request):
             Q(email__icontains=query)
         )
 
-        paginator = Paginator(clientes.order_by('apellido'), 10)
-        page = request.GET.get('page')
-        clientes = paginator.get_page(page)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        html = render_to_string('clientes/tabla.html', {'clientes': clientes})
+        return JsonResponse({'html': html})
 
     return render(request, 'clientes/lista.html', {'clientes': clientes, 'query': query})
 
-
+# vista para creacion de nuevo cliente
 @login_required
 def cliente_create(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
         if form.is_valid():
-            form.save()
+            cliente = form.save(commit=False)
+            cliente.modificado_por = request.user
+            cliente.save()
             messages.success(request, 'Cliente creado exitosamente.')
             return redirect('clientes:listado_clientes')
         else:
@@ -41,17 +45,7 @@ def cliente_create(request):
         form = ClienteForm()
     return render(request, 'clientes/form.html', {'form': form, 'accion': 'Crear'})
 
-@login_required
-def crear_cliente(request):
-    if request.method == 'POST':
-        form = ClienteForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('listado_clientes')
-    else:
-        form = ClienteForm()
-    return render(request, 'clientes/crear_cliente.html', {'form': form})
-
+#vista para actualización de datos de clientes
 @login_required
 def cliente_update(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
@@ -69,7 +63,7 @@ def cliente_update(request, pk):
         form = ClienteForm(instance=cliente)
     return render(request, 'clientes/form.html', {'form': form, 'accion': 'Editar'})
 
-
+#vista para eliminacion de datos de clientes soft_delete
 @login_required
 def cliente_delete(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
@@ -81,14 +75,7 @@ def cliente_delete(request, pk):
         return redirect('clientes:listado_clientes')
     return render(request, 'clientes/confirmar_eliminar.html', {'cliente': cliente})
 
-@login_required
-def eliminar_cliente(request, pk):
-    cliente = get_object_or_404(Cliente, pk=pk)
-    cliente.eliminado = True
-    cliente.modificado_por = request.user
-    cliente.save()
-    return redirect('clientes:listado_clientes')
-
+#vista para creacion de cliente desde modal
 @login_required
 def crear_cliente_ajax(request):
     if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -97,6 +84,9 @@ def crear_cliente_ajax(request):
         apellido = request.POST.get('apellido')
         telefono = request.POST.get('telefono', '')
         email = request.POST.get('email', '')
+
+        if not dni or not nombre or not apellido:
+            return JsonResponse({'success': False, 'mensaje': 'DNI, nombre y apellido son obligatorios.'})
 
         if Cliente.objects.filter(dni=dni).exists():
             return JsonResponse({'success': False, 'mensaje': 'Ya existe un cliente con ese DNI'})
@@ -116,11 +106,14 @@ def crear_cliente_ajax(request):
 
     return JsonResponse({'success': False, 'mensaje': 'Solicitud inválida'})
 
+#busqueda de cliente desde modal con jquery
 @login_required
 def buscar_cliente(request):
     q = request.GET.get('term')  # jQuery UI usa 'term' por defecto
     clientes = Cliente.objects.filter(
-        Q(nombre__icontains=q) | Q(apellido__icontains=q) | Q(dni__icontains=q),
+        Q(nombre__icontains=q) |
+        Q(apellido__icontains=q) |
+        Q(dni__icontains=q),
         eliminado=False
     )[:10]
 

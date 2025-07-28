@@ -4,49 +4,85 @@
 {% block content %}
 <h1 class="h3 mb-4 text-gray-800">Listado de Clientes</h1>
 
-<a href="{% url 'clientes:crear' %}" class="btn btn-success mb-3"><i class="fas fa-plus"></i> Nuevo Cliente</a>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="{% url 'clientes:cliente_crear' %}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Nuevo Cliente
+    </a>
+    <div class="d-flex align-items-center">
+        <input type="text" id="buscar" class="form-control me-2" placeholder="Buscar cliente..." style="width: 250px;">
+        <button id="limpiar" class="btn btn-outline-secondary" type="button">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
 
-<table class="table table-hover">
+<!-- Spinner de carga -->
+<div id="loading-spinner" class="text-center mb-3" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+    </div>
+</div>
+
+<table class="table table-hover" id="tabla-clientes">
     <thead class="table-light">
         <tr>
             <th>DNI</th>
             <th>Nombre</th>
             <th>Teléfono</th>
             <th>Email</th>
-            <th>Activo</th>
             <th>Acciones</th>
         </tr>
     </thead>
-    <tbody>
-        {% for c in clientes %}
-        <tr>
-            <td>{{ c.dni }}</td>
-            <td>{{ c.nombre }} {{ c.apellido }}</td>
-            <td>{{ c.telefono }}</td>
-            <td>{{ c.email }}</td>
-            <td>
-                {% if not c.eliminado %}
-                <span class="badge bg-success">Sí</span>
-                {% else %}
-                <span class="badge bg-danger">No</span>
-                {% endif %}
-            </td>
-            <td class="text-end">
-                <div class="row-actions">
-                    <a href="{% url 'clientes:editar' c.id %}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <a href="{% url 'clientes:eliminar' c.id %}" class="btn btn-sm btn-danger">
-                        <i class="fas fa-trash"></i>
-                    </a>
-                </div>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" class="text-center">No hay clientes registrados.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
+    {% include "clientes/tabla.html" %}
 </table>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('buscar');
+    const limpiarBtn = document.getElementById('limpiar');
+    const tablaClientes = document.getElementById('tabla-clientes');
+    const spinner = document.getElementById('loading-spinner');
+
+    // Restaurar búsqueda previa si existe
+    if (sessionStorage.getItem('busqueda_cliente')) {
+        input.value = sessionStorage.getItem('busqueda_cliente');
+        input.dispatchEvent(new Event('input'));
+    }
+
+    input.addEventListener('input', function() {
+        const query = input.value;
+        sessionStorage.setItem('busqueda_cliente', query);
+
+        const url = `{% url 'clientes:listado_clientes' %}?q=${encodeURIComponent(query)}`;
+        spinner.style.display = 'block';
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            tablaClientes.innerHTML = data.html;
+        })
+        .catch(() => {
+            tablaClientes.innerHTML = "<div class='alert alert-danger'>Error al buscar.</div>";
+        })
+        .finally(() => {
+            spinner.style.display = 'none';
+        });
+    });
+
+    limpiarBtn.addEventListener('click', function() {
+        input.value = '';
+        sessionStorage.removeItem('busqueda_cliente');
+        input.dispatchEvent(new Event('input'));
+    });
+});
+</script>
+
 {% endblock %}

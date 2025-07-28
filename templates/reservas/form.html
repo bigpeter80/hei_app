@@ -14,10 +14,14 @@
                     <!-- Input ocupa 10 de 12 columnas -->
                     <div class="col-12 col-md-8">
                         <label for="cliente-autocomplete" class="form-label">Buscar Cliente</label>
-                        <input type="text" id="cliente-autocomplete" class="form-control"
-                            placeholder="Ingrese nombre o DNI" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" id="cliente-autocomplete" class="form-control"
+                                placeholder="Ingrese nombre o DNI" required>
+                        </div>
                         <input type="hidden" name="cliente" id="cliente-id">
                     </div>
+
 
                     <!-- Botón ocupa 2 de 12 columnas -->
                     <div class="col-12 col-md-4 d-grid align-self-end">
@@ -30,37 +34,55 @@
                 </div>
             </div>
             <div class="mb-3">
-                <label for="id_fecha_entrada">Fecha de entrada</label>
-                <input type="date" name="{{ form.fecha_entrada.name }}" id="id_fecha_entrada" class="form-control"
-                    value="{{ form.fecha_entrada.value|default_if_none:'' }}">
+                <label for="id_fecha_entrada" class="form-label">Fecha de entrada</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                    <input type="date" name="{{ form.fecha_entrada.name }}" id="id_fecha_entrada" class="form-control"
+                        value="{{ form.fecha_entrada.value|default_if_none:'' }}">
+                </div>
             </div>
 
             <div class="mb-3">
-                <label for="id_fecha_salida">Fecha de salida</label>
-                <input type="date" name="{{ form.fecha_salida.name }}" id="id_fecha_salida" class="form-control"
-                    value="{{ form.fecha_salida.value|default_if_none:'' }}">
-            </div>
-
-
-            <div class="mb-3">
-                <label>Habitación</label>
-                {{ form.habitacion|add_class:"form-control" }}
+                <label for="id_fecha_salida" class="form-label">Fecha de salida</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
+                    <input type="date" name="{{ form.fecha_salida.name }}" id="id_fecha_salida" class="form-control"
+                        value="{{ form.fecha_salida.value|default_if_none:'' }}">
+                </div>
             </div>
 
             <div class="mb-3">
-                <label>Información adicional</label>
-                {{ form.informacion_adicional|add_class:"form-control" }}
+                <label for="id_habitacion" class="form-label">Habitación</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-bed"></i></span>
+                    {{ form.habitacion|add_class:"form-control" }}
+                </div>
             </div>
 
             <div class="mb-3">
-                <label>Costo total (estimado)</label>
-                <input type="text" class="form-control" id="costo_total" readonly>
+                <label for="id_informacion_adicional" class="form-label">Información adicional</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-info-circle"></i></span>
+                    {{ form.informacion_adicional|add_class:"form-control" }}
+                </div>
             </div>
 
             <div class="mb-3">
-                <label>Depósito</label>
-                {{ form.deposito|add_class:"form-control" }}
+                <label for="costo_total" class="form-label">Costo total (estimado)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-money-bill-wave"></i></span>
+                    <input type="text" class="form-control" id="costo_total" readonly>
+                </div>
             </div>
+
+            <div class="mb-3">
+                <label for="id_deposito" class="form-label">Depósito</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-coins"></i></span>
+                    {{ form.deposito|add_class:"form-control" }}
+                </div>
+            </div>
+
 
             <div class="d-flex justify-content-between">
                 <a href="{% url 'reservas:listado_reservas' %}" class="btn btn-secondary">Cancelar</a>
@@ -73,41 +95,95 @@
     aria-hidden="true">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
-            <form id="form-nuevo-cliente">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="nuevoClienteModalLabel">Registrar Nuevo Cliente</h5>
-                    <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Cerrar">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="dni" class="form-label">DNI</label>
-                        <input type="text" class="form-control" name="dni" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" name="nombre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="apellido" class="form-label">Apellido</label>
-                        <input type="text" class="form-control" name="apellido" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="telefono" class="form-label">Teléfono</label>
-                        <input type="text" class="form-control" name="telefono">
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email">
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Buscar Cliente -->
+                <div class="mb-3">
+                    <div class="row align-items-center g-2">
+                        <div class="col-12 col-md-8">
+                            <label for="cliente-autocomplete" class="form-label">Buscar Cliente</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" id="cliente-autocomplete" class="form-control"
+                                    placeholder="Ingrese nombre o DNI" required>
+                            </div>
+                            <input type="hidden" name="cliente" id="cliente-id">
+                        </div>
+                        <div class="col-12 col-md-4 d-grid align-self-end">
+                            <label class="form-label invisible">.</label>
+                            <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="modal"
+                                data-bs-target="#nuevoClienteModal">
+                                <i class="fas fa-user-plus"></i> Nuevo Cliente
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer d-flex justify-content-start p-2">
-                    <button type="button" class="btn btn-secondary me-1" data-bs-dismiss="modal">Cancelar</button>
+
+                <!-- Fecha de Entrada -->
+                <div class="mb-3">
+                    <label for="id_fecha_entrada">Fecha de entrada</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        <input type="date" name="{{ form.fecha_entrada.name }}" id="id_fecha_entrada"
+                            class="form-control" value="{{ form.fecha_entrada.value|default_if_none:'' }}">
+                    </div>
+                </div>
+
+                <!-- Fecha de Salida -->
+                <div class="mb-3">
+                    <label for="id_fecha_salida">Fecha de salida</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
+                        <input type="date" name="{{ form.fecha_salida.name }}" id="id_fecha_salida" class="form-control"
+                            value="{{ form.fecha_salida.value|default_if_none:'' }}">
+                    </div>
+                </div>
+
+                <!-- Habitación -->
+                <div class="mb-3">
+                    <label for="id_habitacion">Habitación</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-bed"></i></span>
+                        {{ form.habitacion|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <!-- Información adicional -->
+                <div class="mb-3">
+                    <label for="id_informacion_adicional">Información adicional</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-info-circle"></i></span>
+                        {{ form.informacion_adicional|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <!-- Costo total (solo lectura) -->
+                <div class="mb-3">
+                    <label for="costo_total">Costo total (estimado)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                        <input type="text" class="form-control" id="costo_total" readonly>
+                    </div>
+                </div>
+
+                <!-- Depósito -->
+                <div class="mb-3">
+                    <label for="id_deposito">Depósito</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-money-bill-wave"></i></span>
+                        {{ form.deposito|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'reservas:listado_reservas' %}" class="btn btn-secondary">Cancelar</a>
                     <button type="submit" class="btn btn-success">Guardar</button>
                 </div>
             </form>
+
+
         </div>
     </div>
 </div>
