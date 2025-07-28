@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}Reservas - Hotel Estancia Itapúa{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-gray-800">Listado de Reservas</h1>
+
+<form method="get" class="row mb-3 g-2">
+    <div class="col-md-4">
+        <input type="text" name="cliente" class="form-control" placeholder="Buscar por cliente o DNI" value="{{ cliente_query }}">
+    </div>
+    <div class="col-md-3">
+        <input type="date" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+    </div>
+    <div class="col-md-3">
+        <input type="date" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+    </div>
+    <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-outline-primary">
+            <i class="fas fa-search"></i> Filtrar
+        </button>
+    </div>
+        <div class="col-md-1 d-grid">
+        <a href="{% url 'reservas:listado_reservas' %}" class="btn btn-outline-secondary" title="Limpiar filtros">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+</form>
+
+
+<div class="mb-3">
+    <a href="{% url 'reservas:crear' %}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Nueva Reserva
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Cliente</th>
+                <th>Habitación</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Días</th>
+                <th>Costo</th>
+                <th>Depósito</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reserva in reservas %}
+            <tr>
+                <td>{{ reserva.cliente }}</td>
+                <td>#{{ reserva.habitacion.numero }} ({{ reserva.habitacion.tipo }})</td>
+                <td>{{ reserva.fecha_entrada }}</td>
+                <td>{{ reserva.fecha_salida }}</td>
+                <td>{{ reserva.dias_reserva }}</td>
+                <td>Gs. {{ reserva.costo_total|floatformat:0 }}</td>
+                <td>Gs. {{ reserva.deposito|floatformat:0 }}</td>
+                <td>
+                    {% if not reserva.eliminado %}
+                        <span class="badge badge-success">Activa</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Eliminada</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <!-- futuros enlaces de editar/eliminar -->
+                    <a href="#" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="text-center">No hay reservas registradas.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- paginación -->
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+
+        {% for i in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == i %}active{% endif %}">
+                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+            </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+
+{% endblock %}

@@ -3,7 +3,7 @@ from django.contrib import messages
 from .models import Habitacion
 from .forms import HabitacionForm
 
-def habitacion_list(request):
+def habitacion_lista(request):
     habitaciones = Habitacion.objects.all()
     return render(request, 'habitaciones/lista.html', {'habitaciones': habitaciones})
 
@@ -13,7 +13,7 @@ def habitacion_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Habitación creada exitosamente.')
-            return redirect('habitaciones:listado')
+            return redirect('habitaciones:listado_habitaciones')
         else:
             messages.error(request, 'Por favor corrige los errores del formulario.')
     else:
@@ -27,7 +27,7 @@ def habitacion_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Habitación actualizada correctamente.')
-            return redirect('habitaciones:listado')
+            return redirect('habitaciones:listado_habitaciones')
         else:
             messages.error(request, 'Corrige los errores antes de guardar.')
     else:
@@ -39,5 +39,5 @@ def habitacion_delete(request, pk):
     habitacion = get_object_or_404(Habitacion, pk=pk)
     habitacion.delete()
     messages.success(request, 'Habitación eliminada exitosamente.')
-    return redirect('habitaciones:listado')
+    return redirect('habitaciones:listado_habitaciones')
 

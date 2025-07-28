@@ -1,23 +1,23 @@
 {% load static %}
 {% load widget_tweaks %}
 
-<ul class="navbar-nav bg-white sidebar sidebar-light accordion" id="accordionSidebar" style="width: 260px; box-shadow: 2px 0 10px rgba(0,0,0,0.05);">
+<ul class="navbar-nav bg-white sidebar sidebar-light accordion" id="accordionSidebar"
+    style="width: 260px; box-shadow: 2px 0 10px rgba(0,0,0,0.05);">
 
-<!-- Logo y título -->
-<a class="sidebar-brand d-flex align-items-center justify-content-center mt-3 mb-2" href="#">
-  <div class="sidebar-brand-icon">
-    <img src="{% static 'images/hei_logo.png' %}" alt="Logo" style="width: 100px; height: auto;">
-  </div>
-</a>
-<div class="text-center text-dark fw-bold mb-3" style="font-size: 16px;">Hotel Estancia Itapúa</div>
-
+  <!-- Logo -->
+  <a class="sidebar-brand d-flex align-items-center justify-content-center mt-3 mb-2" href="{% url 'usuarios:dashboard' %}">
+    <div class="sidebar-brand-icon">
+      <img src="{% static 'images/hei_logo.png' %}" alt="Logo" style="width: 100px; height: auto;">
+    </div>
+  </a>
+  <div class="text-center text-dark fw-bold mb-3" style="font-size: 16px;">Hotel Estancia Itapúa</div>
 
   <!-- Divider -->
   <hr class="sidebar-divider my-0">
 
   <!-- Dashboard -->
   <li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-    <a class="nav-link" href="{% url 'dashboard' %}">
+    <a class="nav-link" href="{% url 'usuarios:dashboard' %}">
       <i class="fas fa-fw fa-tachometer-alt"></i>
       <span>Panel de Control</span>
     </a>
@@ -25,38 +25,30 @@
 
   <!-- Divider -->
   <hr class="sidebar-divider">
-
-  <!-- Encabezado -->
   <div class="sidebar-heading">Gestión</div>
 
   <!-- Clientes -->
-  <li class="nav-item {% if request.resolver_match.url_name == 'clientes_lista' %}active{% endif %}">
-    <a class="nav-link" href="{% url 'clientes:listado' %}">
+  <li class="nav-item {% if request.resolver_match.url_name == 'listado_clientes' %}active{% endif %}">
+    <a class="nav-link" href="{% url 'clientes:listado_clientes' %}">
       <i class="fas fa-fw fa-users"></i>
       <span>Clientes</span>
     </a>
   </li>
 
-    <!-- Habitaciones -->
-  <li class="nav-item">
-    <a class="nav-link" href="{% url 'habitaciones:listado' %}">
+  <!-- Habitaciones -->
+  <li class="nav-item {% if request.resolver_match.url_name == 'listado_habitaciones' %}active{% endif %}">
+    <a class="nav-link" href="{% url 'habitaciones:listado_habitaciones' %}">
       <i class="fas fa-fw fa-bed"></i>
       <span>Habitaciones</span>
     </a>
   </li>
 
-  <!-- Reservas (submenu) -->
-  <li class="nav-item">
-    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReservas" aria-expanded="true" aria-controls="collapseReservas">
+  <!-- Reservas -->
+  <li class="nav-item {% if request.resolver_match.url_name == 'listado_reservas' %}active{% endif %}">
+    <a class="nav-link" href="{% url 'reservas:listado_reservas' %}">
       <i class="fas fa-fw fa-calendar-check"></i>
       <span>Reservas</span>
     </a>
-    <div id="collapseReservas" class="collapse" data-parent="#accordionSidebar">
-      <div class="bg-white py-2 collapse-inner rounded">
-        <a class="collapse-item" href="#">Nueva Reserva</a>
-        <a class="collapse-item" href="#">Lista de Reservas</a>
-      </div>
-    </div>
   </li>
 
   <!-- Facturación -->
@@ -72,7 +64,7 @@
 
   <!-- Logout -->
   <li class="nav-item">
-    <a class="nav-link" href="{% url 'logout' %}">
+    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
       <i class="fas fa-fw fa-sign-out-alt"></i>
       <span>Salir</span>
     </a>

@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}{{ accion }} Reservas - Hotel Estancia Itapúa{% endblock %}
+{% block content %}
+<div class="container d-flex justify-content-center">
+    <div class="card shadow p-4 mt-4 mb-5" style="width: 100%; max-width: 720px;">
+        <h1 class="h4 text-gray-800 mb-4 text-center">{{ accion }} Reserva</h1>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <div class="row align-items-center g-2">
+                    <!-- Input ocupa 10 de 12 columnas -->
+                    <div class="col-12 col-md-8">
+                        <label for="cliente-autocomplete" class="form-label">Buscar Cliente</label>
+                        <input type="text" id="cliente-autocomplete" class="form-control"
+                            placeholder="Ingrese nombre o DNI" required>
+                        <input type="hidden" name="cliente" id="cliente-id">
+                    </div>
+
+                    <!-- Botón ocupa 2 de 12 columnas -->
+                    <div class="col-12 col-md-4 d-grid align-self-end">
+                        <label class="form-label invisible">.</label> <!-- Espacio para alinear con el input -->
+                        <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="modal"
+                            data-bs-target="#nuevoClienteModal">
+                            <i class="fas fa-user-plus"></i> Nuevo Cliente
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="id_fecha_entrada">Fecha de entrada</label>
+                <input type="date" name="{{ form.fecha_entrada.name }}" id="id_fecha_entrada" class="form-control"
+                    value="{{ form.fecha_entrada.value|default_if_none:'' }}">
+            </div>
+
+            <div class="mb-3">
+                <label for="id_fecha_salida">Fecha de salida</label>
+                <input type="date" name="{{ form.fecha_salida.name }}" id="id_fecha_salida" class="form-control"
+                    value="{{ form.fecha_salida.value|default_if_none:'' }}">
+            </div>
+
+
+            <div class="mb-3">
+                <label>Habitación</label>
+                {{ form.habitacion|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label>Información adicional</label>
+                {{ form.informacion_adicional|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label>Costo total (estimado)</label>
+                <input type="text" class="form-control" id="costo_total" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label>Depósito</label>
+                {{ form.deposito|add_class:"form-control" }}
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'reservas:listado_reservas' %}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-success">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade" id="nuevoClienteModal" tabindex="-1" aria-labelledby="nuevoClienteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <form id="form-nuevo-cliente">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nuevoClienteModalLabel">Registrar Nuevo Cliente</h5>
+                    <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="dni" class="form-label">DNI</label>
+                        <input type="text" class="form-control" name="dni" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="apellido" class="form-label">Apellido</label>
+                        <input type="text" class="form-control" name="apellido" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" name="telefono">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email">
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-start p-2">
+                    <button type="button" class="btn btn-secondary me-1" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+    // Autocompleta el cliente en el input
+    $(function () {
+        $("#cliente-autocomplete").autocomplete({
+            source: "{% url 'clientes:buscar_cliente' %}",
+            minLength: 2,
+            select: function (event, ui) {
+                $("#id_cliente").val(ui.item.id);  // este será enviado en el POST
+                $(this).val(ui.item.label);       // muestra nombre completo
+                return false;
+            }
+        });
+    });
+</script>
+
+<script>
+    // Búsqueda AJAX de cliente
+    $('#buscar_cliente').on('input', function () {
+        const q = $(this).val();
+        $.get("{% url 'reservas:buscar_cliente' %}", { q }, function (data) {
+            const select = $('#id_cliente');
+            select.empty();
+            select.append($('<option>', { text: 'Seleccione un cliente', value: '' }));
+            data.forEach(cliente => {
+                select.append($('<option>', {
+                    value: cliente.id,
+                    text: `${cliente.nombre} ${cliente.apellido} - DNI ${cliente.dni}`
+                }));
+            });
+        });
+    });
+</script>
+
+<script>
+    // Actualiza las habitaciones
+    function actualizarHabitaciones() {
+        const entrada = $('#id_fecha_entrada').val();
+        const salida = $('#id_fecha_salida').val();
+        if (entrada && salida) {
+            $.get("{% url 'reservas:habitaciones_disponibles' %}", {
+                entrada: entrada,
+                salida: salida
+            }, function (data) {
+                const select = $('#id_habitacion');
+                select.empty();
+                select.append($('<option>', { text: 'Seleccione una habitación', value: '' }));
+                data.forEach(h => {
+                    select.append($('<option>', {
+                        value: h.id,
+                        text: `#${h.numero} - ${h.tipo}`
+                    }));
+                });
+            });
+        }
+    }
+
+    $('#id_fecha_entrada, #id_fecha_salida').on('change', actualizarHabitaciones);
+</script>
+<script>
+    // Función para calcular el costo total de la reserva
+    function calcularCostoTotal() {
+        const entrada = new Date($('#id_fecha_entrada').val());
+        const salida = new Date($('#id_fecha_salida').val());
+        const habitacionId = $('#id_habitacion').val();
+
+        if (entrada && salida && habitacionId) {
+            const diferenciaMs = salida - entrada;
+            const dias = Math.max(Math.ceil(diferenciaMs / (1000 * 60 * 60 * 24)), 1); // mínimo 1 día
+
+            // Consultamos el costo diario de la habitación seleccionada
+            $.get("{% url 'reservas:habitaciones_disponibles' %}", {
+                entrada: $('#id_fecha_entrada').val(),
+                salida: $('#id_fecha_salida').val()
+            }, function (data) {
+                const habitacion = data.find(h => h.id == habitacionId);
+                if (habitacion) {
+                    const costo_diario = habitacion.costo_diario || 0;
+                    const total = dias * costo_diario;
+                    $('#costo_total').val(`Gs. ${total.toLocaleString('es-PY', { style: 'currency', currency: 'PYG' })}`);
+                }
+            });
+        }
+    }
+
+    $('#id_fecha_entrada, #id_fecha_salida, #id_habitacion').on('change', calcularCostoTotal);
+</script>
+
+<script>
+    // Envio de datos del nuevo cliente y agrega los datos al input
+    document.getElementById('form-nuevo-cliente').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch("{% url 'clientes:crear_cliente_ajax' %}", {
+            method: "POST",
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // asignar el nuevo cliente al campo autocomplete
+                    document.getElementById('cliente-id').value = data.id;
+                    document.getElementById('cliente-autocomplete').value = data.nombre;
+                    bootstrap.Modal.getInstance(document.getElementById('nuevoClienteModal')).hide();
+                } else {
+                    alert(data.mensaje || 'Error al guardar el cliente');
+                }
+            });
+    });
+</script>
+
+<script>
+    // Focus en el input del formulario
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('cliente-autocomplete');
+        if (input) {
+            input.focus();
+        }
+    });
+</script>
+
+<script>
+    // Focus en el input del modal
+    const nuevoClienteModal = document.getElementById('nuevoClienteModal');
+    if (nuevoClienteModal) {
+        nuevoClienteModal.addEventListener('shown.bs.modal', function () {
+            const dniInput = nuevoClienteModal.querySelector('input[name="dni"]');
+            if (dniInput) {
+                dniInput.focus();
+            }
+        });
+    }
+</script>
+
+{% endblock %}

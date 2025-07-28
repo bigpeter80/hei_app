@@ -12,7 +12,7 @@ class UsuarioLoginView(LoginView):
 
 class UsuarioLogoutView(LogoutView):
     http_method_names = ['post']
-    next_page = reverse_lazy('login')
+    next_page = reverse_lazy('usuarios:login')
 
 @login_required
 @never_cache
@@ -27,5 +27,5 @@ def dashboard_view(request):
 
 def home_redirect(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
-    return redirect('login')
+        return redirect('usuarios:dashboard')
+    return redirect('usuarios:login')

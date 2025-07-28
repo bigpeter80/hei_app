@@ -194,3 +194,27 @@ label {
 .toast-info {
     border-color: #0dcaf0; /* azul claro */
 }
+
+/* Estilos del menú de autocompletado adaptados a Bootstrap */
+.ui-autocomplete {
+    z-index: 1051 !important; /* superior al modal y toast */
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    font-size: 0.95rem;
+    padding: 0;
+}
+
+.ui-menu-item-wrapper {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.ui-menu-item-wrapper:hover {
+    background-color: #f8f9fa;
+    color: #000;
+}

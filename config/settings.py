@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'apps.usuarios',
     'apps.clientes',
     'apps.habitaciones',
+    'apps.reservas',
 ]
 
 #modelo personalizado para los usuarios.

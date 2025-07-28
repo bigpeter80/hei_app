@@ -5,10 +5,12 @@
 
 <head>
     <meta charset="utf-8">
-    <title>{% block title %}Hei System{% endblock %}</title>
+    <title>{% block title %}Hotel Estancia Itapúa{% endblock %}</title>
     <!-- SB Admin 2 CSS -->
     <link href="{% static 'sb-admin-2/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'sb-admin-2/css/sb-admin-2.min.css' %}" rel="stylesheet">
+    <!-- CSS de jQuery UI local -->
+    <link href="{% static 'jquery-ui-1.14.1.custom/jquery-ui.min.css' %}" rel="stylesheet">
     <!-- Estilo de color de plantillas -->
     <link id="theme-stylesheet" href="{% static 'sb-admin-2/css/light-theme.css' %}" rel="stylesheet">
 
@@ -73,11 +75,40 @@
     </div>
     <!-- End of Page Wrapper -->
 
+    <!-- Modal de confirmación de logout -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <form method="post" action="{% url 'usuarios:logout' %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="logoutModalLabel">¿Salir del sistema?</h5>
+                        <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Cerrar">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        ¿Estás seguro de que deseas cerrar sesión?
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Salir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
     <!-- JS -->
+    <!-- jQuery -->
     <script src="{% static 'sb-admin-2/vendor/jquery/jquery.min.js' %}"></script>
-    <script src="{% static 'sb-admin-2/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- Bootstrap -->
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- jQuery UI -->
     <script src="{% static 'sb-admin-2/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
     <script src="{% static 'sb-admin-2/js/sb-admin-2.min.js' %}"></script>
+    <script src="{% static 'jquery-ui-1.14.1.custom/jquery-ui.min.js' %}"></script>
 
 
     {% block extra_js %}{% endblock %}
