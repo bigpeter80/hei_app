@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reserva N° {{ reserva.id }} - Hotel Estancia Itapúa</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-weight: bold; font-size: 14px; margin-bottom: 10px; border-bottom: 1px solid #000; }
+        .label { font-weight: bold; }
+        .row { margin-bottom: 6px; }
+        .small { font-size: 11px; color: #555; }
+        .border-box { border: 1px solid #888; padding: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>Hotel Estancia Itapúa</h2>
+        <p class="small">Detalle de Reserva N° {{ reserva.id }}</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Datos del Cliente</div>
+        <div class="row"><span class="label">Nombre:</span> {{ reserva.cliente }}</div>
+        <div class="row"><span class="label">DNI:</span> {{ reserva.cliente.dni }}</div>
+        <div class="row"><span class="label">Teléfono:</span> {{ reserva.cliente.telefono|default:"-" }}</div>
+        <div class="row"><span class="label">Email:</span> {{ reserva.cliente.email|default:"-" }}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Datos de la Reserva</div>
+        <div class="row"><span class="label">Habitación:</span> #{{ reserva.habitacion.numero }} ({{ reserva.habitacion.tipo }})</div>
+        <div class="row"><span class="label">Fecha de Entrada:</span> {{ reserva.fecha_entrada|date:"d/m/Y" }}</div>
+        <div class="row"><span class="label">Fecha de Salida:</span> {{ reserva.fecha_salida|date:"d/m/Y" }}</div>
+        <div class="row"><span class="label">Cantidad de Días:</span> {{ reserva.dias_reserva }}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Información Financiera</div>
+        <div class="row"><span class="label">Depósito:</span> Gs. {{ reserva.deposito|floatformat:0 }}</div>
+        <div class="row"><span class="label">Costo Total:</span> Gs. {{ reserva.costo_total|floatformat:0 }}</div>
+    </div>
+
+    {% if reserva.informacion_adicional %}
+    <div class="section">
+        <div class="section-title">Información Adicional</div>
+        <div class="border-box">
+            {{ reserva.informacion_adicional }}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <div class="row"><span class="label">Estado de la Reserva:</span>
+            {% if reserva.eliminado %}
+                Cancelada
+            {% else %}
+                Activa
+            {% endif %}
+        </div>
+        <div class="row small">Fecha de generación del documento: {{ now|date:"d/m/Y H:i" }}</div>
+    </div>
+
+</body>
+</html>

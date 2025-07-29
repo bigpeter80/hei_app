@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+
 {% block title %}{{ accion }} Reservas - Hotel Estancia Itapúa{% endblock %}
+
 {% block content %}
 <div class="container d-flex justify-content-center">
     <div class="card shadow p-4 mt-4 mb-5" style="width: 100%; max-width: 720px;">
@@ -11,21 +13,18 @@
             {% csrf_token %}
             <div class="mb-3">
                 <div class="row align-items-center g-2">
-                    <!-- Input ocupa 10 de 12 columnas -->
                     <div class="col-12 col-md-8">
                         <label for="cliente-autocomplete" class="form-label">Buscar Cliente</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" id="cliente-autocomplete" class="form-control"
-                                placeholder="Ingrese nombre o DNI" required>
+                            <input type="text" id="cliente-autocomplete" class="form-control" placeholder="Ingrese nombre o DNI"
+                                value="{{ form.instance.cliente.get_nombre_completo }}" required>
                         </div>
-                        <input type="hidden" name="cliente" id="cliente-id">
+                        <input type="hidden" name="cliente" id="cliente-id" value="{{ form.instance.cliente.id }}">
+
                     </div>
-
-
-                    <!-- Botón ocupa 2 de 12 columnas -->
                     <div class="col-12 col-md-4 d-grid align-self-end">
-                        <label class="form-label invisible">.</label> <!-- Espacio para alinear con el input -->
+                        <label class="form-label invisible">.</label>
                         <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="modal"
                             data-bs-target="#nuevoClienteModal">
                             <i class="fas fa-user-plus"></i> Nuevo Cliente
@@ -33,22 +32,27 @@
                     </div>
                 </div>
             </div>
+
             <div class="mb-3">
                 <label for="id_fecha_entrada" class="form-label">Fecha de entrada</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                    <input type="date" name="{{ form.fecha_entrada.name }}" id="id_fecha_entrada" class="form-control"
-                        value="{{ form.fecha_entrada.value|default_if_none:'' }}">
+                    {{ form.fecha_entrada|add_class:"form-control" }}
                 </div>
+                {% if form.fecha_entrada.errors %}
+                <div class="text-danger small">{{ form.fecha_entrada.errors.0 }}</div>
+                {% endif %}
             </div>
 
             <div class="mb-3">
                 <label for="id_fecha_salida" class="form-label">Fecha de salida</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
-                    <input type="date" name="{{ form.fecha_salida.name }}" id="id_fecha_salida" class="form-control"
-                        value="{{ form.fecha_salida.value|default_if_none:'' }}">
+                    {{ form.fecha_salida|add_class:"form-control" }}
                 </div>
+                {% if form.fecha_salida.errors %}
+                <div class="text-danger small">{{ form.fecha_salida.errors.0 }}</div>
+                {% endif %}
             </div>
 
             <div class="mb-3">
@@ -57,6 +61,9 @@
                     <span class="input-group-text"><i class="fas fa-bed"></i></span>
                     {{ form.habitacion|add_class:"form-control" }}
                 </div>
+                {% if form.habitacion.errors %}
+                <div class="text-danger small">{{ form.habitacion.errors.0 }}</div>
+                {% endif %}
             </div>
 
             <div class="mb-3">
@@ -81,8 +88,10 @@
                     <span class="input-group-text"><i class="fas fa-coins"></i></span>
                     {{ form.deposito|add_class:"form-control" }}
                 </div>
+                {% if form.deposito.errors %}
+                <div class="text-danger small">{{ form.deposito.errors.0 }}</div>
+                {% endif %}
             </div>
-
 
             <div class="d-flex justify-content-between">
                 <a href="{% url 'reservas:listado_reservas' %}" class="btn btn-secondary">Cancelar</a>
@@ -91,142 +100,66 @@
         </form>
     </div>
 </div>
+
+<!-- Modal para nuevo cliente -->
 <div class="modal fade" id="nuevoClienteModal" tabindex="-1" aria-labelledby="nuevoClienteModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog modal-md">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post">
+            <form id="form-nuevo-cliente" method="post">
                 {% csrf_token %}
-
-                <!-- Buscar Cliente -->
-                <div class="mb-3">
-                    <div class="row align-items-center g-2">
-                        <div class="col-12 col-md-8">
-                            <label for="cliente-autocomplete" class="form-label">Buscar Cliente</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                <input type="text" id="cliente-autocomplete" class="form-control"
-                                    placeholder="Ingrese nombre o DNI" required>
-                            </div>
-                            <input type="hidden" name="cliente" id="cliente-id">
-                        </div>
-                        <div class="col-12 col-md-4 d-grid align-self-end">
-                            <label class="form-label invisible">.</label>
-                            <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="modal"
-                                data-bs-target="#nuevoClienteModal">
-                                <i class="fas fa-user-plus"></i> Nuevo Cliente
-                            </button>
-                        </div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nuevoClienteModalLabel">Nuevo Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Aquí debes incluir los campos del modelo Cliente -->
+                    <div class="mb-3">
+                        <label for="nombre_cliente" class="form-label">Nombre</label>
+                        <input type="text" name="nombre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="apellido_cliente" class="form-label">Apellido</label>
+                        <input type="text" name="apellido" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dni_cliente" class="form-label">DNI</label>
+                        <input type="text" name="dni" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefono_cliente" class="form-label">Teléfono</label>
+                        <input type="text" name="telefono" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email_cliente" class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control">
                     </div>
                 </div>
-
-                <!-- Fecha de Entrada -->
-                <div class="mb-3">
-                    <label for="id_fecha_entrada">Fecha de entrada</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                        <input type="date" name="{{ form.fecha_entrada.name }}" id="id_fecha_entrada"
-                            class="form-control" value="{{ form.fecha_entrada.value|default_if_none:'' }}">
-                    </div>
-                </div>
-
-                <!-- Fecha de Salida -->
-                <div class="mb-3">
-                    <label for="id_fecha_salida">Fecha de salida</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
-                        <input type="date" name="{{ form.fecha_salida.name }}" id="id_fecha_salida" class="form-control"
-                            value="{{ form.fecha_salida.value|default_if_none:'' }}">
-                    </div>
-                </div>
-
-                <!-- Habitación -->
-                <div class="mb-3">
-                    <label for="id_habitacion">Habitación</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-bed"></i></span>
-                        {{ form.habitacion|add_class:"form-control" }}
-                    </div>
-                </div>
-
-                <!-- Información adicional -->
-                <div class="mb-3">
-                    <label for="id_informacion_adicional">Información adicional</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-info-circle"></i></span>
-                        {{ form.informacion_adicional|add_class:"form-control" }}
-                    </div>
-                </div>
-
-                <!-- Costo total (solo lectura) -->
-                <div class="mb-3">
-                    <label for="costo_total">Costo total (estimado)</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
-                        <input type="text" class="form-control" id="costo_total" readonly>
-                    </div>
-                </div>
-
-                <!-- Depósito -->
-                <div class="mb-3">
-                    <label for="id_deposito">Depósito</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-money-bill-wave"></i></span>
-                        {{ form.deposito|add_class:"form-control" }}
-                    </div>
-                </div>
-
-                <!-- Botones -->
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'reservas:listado_reservas' %}" class="btn btn-secondary">Cancelar</a>
-                    <button type="submit" class="btn btn-success">Guardar</button>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Guardar Cliente</button>
                 </div>
             </form>
-
-
         </div>
     </div>
 </div>
 {% endblock %}
 
-
 {% block extra_js %}
-
 <script>
-    // Autocompleta el cliente en el input
+    // Autocompletar cliente
     $(function () {
         $("#cliente-autocomplete").autocomplete({
             source: "{% url 'clientes:buscar_cliente' %}",
             minLength: 2,
             select: function (event, ui) {
-                $("#id_cliente").val(ui.item.id);  // este será enviado en el POST
-                $(this).val(ui.item.label);       // muestra nombre completo
+                $("#cliente-id").val(ui.item.id);
+                $(this).val(ui.item.label);
                 return false;
             }
         });
     });
-</script>
 
-<script>
-    // Búsqueda AJAX de cliente
-    $('#buscar_cliente').on('input', function () {
-        const q = $(this).val();
-        $.get("{% url 'reservas:buscar_cliente' %}", { q }, function (data) {
-            const select = $('#id_cliente');
-            select.empty();
-            select.append($('<option>', { text: 'Seleccione un cliente', value: '' }));
-            data.forEach(cliente => {
-                select.append($('<option>', {
-                    value: cliente.id,
-                    text: `${cliente.nombre} ${cliente.apellido} - DNI ${cliente.dni}`
-                }));
-            });
-        });
-    });
-</script>
-
-<script>
-    // Actualiza las habitaciones
+    // Actualizar habitaciones disponibles
     function actualizarHabitaciones() {
         const entrada = $('#id_fecha_entrada').val();
         const salida = $('#id_fecha_salida').val();
@@ -249,38 +182,31 @@
     }
 
     $('#id_fecha_entrada, #id_fecha_salida').on('change', actualizarHabitaciones);
-</script>
-<script>
-    // Función para calcular el costo total de la reserva
+
+    // Calcular costo total
     function calcularCostoTotal() {
         const entrada = new Date($('#id_fecha_entrada').val());
         const salida = new Date($('#id_fecha_salida').val());
         const habitacionId = $('#id_habitacion').val();
 
         if (entrada && salida && habitacionId) {
-            const diferenciaMs = salida - entrada;
-            const dias = Math.max(Math.ceil(diferenciaMs / (1000 * 60 * 60 * 24)), 1); // mínimo 1 día
-
-            // Consultamos el costo diario de la habitación seleccionada
+            const dias = Math.max(Math.ceil((salida - entrada) / (1000 * 60 * 60 * 24)), 1);
             $.get("{% url 'reservas:habitaciones_disponibles' %}", {
                 entrada: $('#id_fecha_entrada').val(),
                 salida: $('#id_fecha_salida').val()
             }, function (data) {
                 const habitacion = data.find(h => h.id == habitacionId);
                 if (habitacion) {
-                    const costo_diario = habitacion.costo_diario || 0;
-                    const total = dias * costo_diario;
-                    $('#costo_total').val(`Gs. ${total.toLocaleString('es-PY', { style: 'currency', currency: 'PYG' })}`);
+                    const total = dias * habitacion.costo_diario;
+                    $('#costo_total').val(`Gs. ${total.toLocaleString('es-PY')}`);
                 }
             });
         }
     }
 
     $('#id_fecha_entrada, #id_fecha_salida, #id_habitacion').on('change', calcularCostoTotal);
-</script>
 
-<script>
-    // Envio de datos del nuevo cliente y agrega los datos al input
+    // Guardar nuevo cliente vía AJAX
     document.getElementById('form-nuevo-cliente').addEventListener('submit', function (e) {
         e.preventDefault();
         const formData = new FormData(this);
@@ -294,9 +220,8 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // asignar el nuevo cliente al campo autocomplete
-                    document.getElementById('cliente-id').value = data.id;
-                    document.getElementById('cliente-autocomplete').value = data.nombre;
+                    $('#cliente-id').val(data.id);
+                    $('#cliente-autocomplete').val(data.nombre);
                     bootstrap.Modal.getInstance(document.getElementById('nuevoClienteModal')).hide();
                 } else {
                     alert(data.mensaje || 'Error al guardar el cliente');
@@ -304,28 +229,4 @@
             });
     });
 </script>
-
-<script>
-    // Focus en el input del formulario
-    document.addEventListener('DOMContentLoaded', function () {
-        const input = document.getElementById('cliente-autocomplete');
-        if (input) {
-            input.focus();
-        }
-    });
-</script>
-
-<script>
-    // Focus en el input del modal
-    const nuevoClienteModal = document.getElementById('nuevoClienteModal');
-    if (nuevoClienteModal) {
-        nuevoClienteModal.addEventListener('shown.bs.modal', function () {
-            const dniInput = nuevoClienteModal.querySelector('input[name="dni"]');
-            if (dniInput) {
-                dniInput.focus();
-            }
-        });
-    }
-</script>
-
 {% endblock %}
