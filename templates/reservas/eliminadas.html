@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reservas Canceladas - Hotel Estancia Itapúa{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-gray-800">Reservas Canceladas</h1>
+
+<form method="get" class="row mb-3 g-2">
+    <div class="col-md-3">
+        <input type="text" name="cliente" class="form-control" placeholder="Buscar por cliente o DNI"
+               value="{{ cliente_query }}">
+    </div>
+    <div class="col-md-3">
+        <input type="date" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+    </div>
+    <div class="col-md-3">
+        <input type="date" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+    </div>
+    <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-outline-primary">
+            <i class="fas fa-search"></i> Filtrar
+        </button>
+    </div>
+    <div class="col-md-1 d-grid">
+        <a href="{% url 'reservas:reservas_eliminadas' %}" class="btn btn-outline-secondary" title="Limpiar filtros">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+</form>
+
+<div class="mb-3">
+    <a href="{% url 'reservas:listado_reservas' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Volver al listado principal
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Cliente</th>
+                <th>Habitación</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Días</th>
+                <th>Cancelado por</th>
+                <th>Fecha cancelación</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for res in reservas %}
+            <tr>
+                <td>{{ res.cliente }}</td>
+                <td>#{{ res.habitacion.numero }} ({{ res.habitacion.tipo }})</td>
+                <td>{{ res.fecha_entrada|date:"d/m/Y" }}</td>
+                <td>{{ res.fecha_salida|date:"d/m/Y" }}</td>
+                <td>{{ res.dias_reserva }}</td>
+                <td>{{ res.modificado_por }}</td>
+                <td>{{ res.fecha_modificacion|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="text-center">No hay reservas canceladas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginación -->
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?page={{ page_obj.previous_page_number }}&cliente={{ cliente_query }}&fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}">&laquo;</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+
+        {% for i in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == i %}active{% endif %}">
+            <a class="page-link"
+               href="?page={{ i }}&cliente={{ cliente_query }}&fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}">{{ i }}</a>
+        </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?page={{ page_obj.next_page_number }}&cliente={{ cliente_query }}&fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}">&raquo;</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+
+{% endblock %}

@@ -68,7 +68,7 @@ def eliminar_reserva(request, pk):
     reserva.eliminado = True
     reserva.modificado_por = request.user
     reserva.save()
-    messages.success(request, 'Reserva eliminada correctamente.')
+    messages.success(request, 'Reserva cancelada correctamente.')
     return redirect('reservas:listado_reservas')
 
 # Vista de detalle
@@ -172,3 +172,38 @@ def habitaciones_disponibles(request):
             return JsonResponse([], safe=False)
 
     return JsonResponse(list(disponibles), safe=False)
+
+
+@login_required
+def reservas_eliminadas(request):
+    cliente_query = request.GET.get('cliente', '')
+    fecha_inicio = request.GET.get('fecha_inicio', '')
+    fecha_fin = request.GET.get('fecha_fin', '')
+
+    reservas = Reserva.objects.filter(eliminado=True)
+
+    if cliente_query:
+        reservas = reservas.filter(
+            Q(cliente__nombre__icontains=cliente_query) |
+            Q(cliente__apellido__icontains=cliente_query) |
+            Q(cliente__dni__icontains=cliente_query)
+        )
+
+    if fecha_inicio:
+        reservas = reservas.filter(fecha_entrada__gte=fecha_inicio)
+
+    if fecha_fin:
+        reservas = reservas.filter(fecha_salida__lte=fecha_fin)
+
+    reservas = reservas.order_by('-fecha_entrada')
+    paginator = Paginator(reservas, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'reservas/eliminadas.html', {
+        'reservas': page_obj,
+        'page_obj': page_obj,
+        'cliente_query': cliente_query,
+        'fecha_inicio': fecha_inicio,
+        'fecha_fin': fecha_fin,
+    })
