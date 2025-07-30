@@ -13,6 +13,7 @@ from apps.habitaciones.models import Habitacion
 from apps.clientes.models import Cliente
 from .models import Reserva
 from .forms import ReservaForm
+from apps.facturacion.utils import generar_factura 
 
 # Crear una nueva reserva
 @login_required
@@ -207,3 +208,52 @@ def reservas_eliminadas(request):
         'fecha_inicio': fecha_inicio,
         'fecha_fin': fecha_fin,
     })
+
+@login_required
+def realizar_check_in(request, pk):
+    reserva = get_object_or_404(Reserva, pk=pk, eliminado=False)
+    if reserva.estado == 'reservado':
+        reserva.estado = 'ocupado'
+        reserva.habitacion.estado = 'ocupada'
+        reserva.modificado_por = request.user
+        reserva.save()
+        reserva.habitacion.save()
+        messages.success(request, 'Check-in realizado correctamente. La habitación está ahora ocupada.')
+    else:
+        messages.warning(request, 'La reserva no se encuentra en estado "reservado".')
+    return redirect('reservas:listado_reservas')
+
+@login_required
+def realizar_check_out(request, pk):
+    reserva = get_object_or_404(Reserva, pk=pk, eliminado=False)
+    if reserva.estado == 'ocupado':
+        reserva.estado = 'finalizado'
+        reserva.habitacion.estado = 'disponible'
+        reserva.modificado_por = request.user
+        reserva.save()
+        reserva.habitacion.save()
+
+        # Lógica para generar factura (debes tener esto implementado)
+        generar_factura(reserva, usuario=request.user)
+
+        messages.success(request, 'Check-out realizado. La habitación está disponible y se generó la factura.')
+    else:
+        messages.warning(request, 'La reserva no está en estado "ocupado".')
+    return redirect('reservas:listado_reservas')
+
+@login_required
+def checkout(request, pk):
+    reserva = get_object_or_404(Reserva, pk=pk, eliminado=False)
+
+    if reserva.estado != 'ocupado':
+        messages.error(request, 'Solo las reservas en estado "ocupado" pueden finalizarse.')
+        return redirect('reservas:listado_reservas')
+
+    reserva.estado = 'finalizado'
+    reserva.modificado_por = request.user
+    reserva.save()
+
+    generar_factura(reserva, request.user)  # Generación automática de factura
+
+    messages.success(request, 'Check-out realizado. Reserva finalizada y factura generada.')
+    return redirect('reservas:detalle', pk=reserva.pk)

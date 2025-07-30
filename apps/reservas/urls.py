@@ -14,4 +14,6 @@ urlpatterns = [
     path('buscar-cliente/', views.buscar_cliente, name='buscar_cliente'),
     path('habitaciones-disponibles/', views.habitaciones_disponibles, name='habitaciones_disponibles'),
     path('eliminadas/', views.reservas_eliminadas, name='reservas_eliminadas'),
+    path('check-in/<int:pk>/', views.realizar_check_in, name='check_in'),
+    path('check-out/<int:pk>/', views.realizar_check_out, name='check_out'),
 ]

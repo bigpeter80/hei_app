@@ -1,0 +1,80 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura - Hotel Estancia Itapúa</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        @media print {
+            .no-print { display: none; }
+        }
+        body {
+            font-size: 14px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Hotel Estancia Itapúa</h4>
+        <button class="btn btn-sm btn-primary no-print" onclick="window.print()">
+            <i class="fas fa-print"></i> Imprimir
+        </button>
+    </div>
+
+    <h5>Factura N° {{ factura.id }}</h5>
+    <p><strong>Cliente:</strong> {{ factura.reserva.cliente }}</p>
+    <p><strong>Habitación:</strong> #{{ factura.reserva.habitacion.numero }} ({{ factura.reserva.habitacion.tipo }})</p>
+    <p><strong>Entrada:</strong> {{ factura.reserva.fecha_entrada|date:"d/m/Y" }} &nbsp;&nbsp;
+       <strong>Salida:</strong> {{ factura.reserva.fecha_salida|date:"d/m/Y" }}</p>
+
+    <hr>
+
+    <h6>Detalle de Consumos</h6>
+    <table class="table table-bordered table-sm">
+        <thead class="table-light">
+            <tr>
+                <th>Descripción</th>
+                <th class="text-center">Cantidad</th>
+                <th class="text-end">Precio Unitario</th>
+                <th class="text-end">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in factura.detalles.all %}
+            <tr>
+                <td>{{ detalle.descripcion }}</td>
+                <td class="text-center">{{ detalle.cantidad }}</td>
+                <td class="text-end">Gs. {{ detalle.precio_unitario|floatformat:0|intcomma }}</td>
+                <td class="text-end">Gs. {{ detalle.subtotal|floatformat:0|intcomma }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">No se registraron consumos.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3" class="text-end">Total Estadía</th>
+                <th class="text-end">Gs. {{ factura.total_estadia|floatformat:0|intcomma }}</th>
+            </tr>
+            <tr>
+                <th colspan="3" class="text-end">Total Consumo</th>
+                <th class="text-end">Gs. {{ factura.total_consumo|floatformat:0|intcomma }}</th>
+            </tr>
+            <tr class="table-primary">
+                <th colspan="3" class="text-end">Total General</th>
+                <th class="text-end">Gs. {{ factura.total_general|floatformat:0|intcomma }}</th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <p class="text-muted mt-4">Emitida por: {{ factura.creado_por }} - Fecha: {{ factura.creado_en|date:"d/m/Y H:i" }}</p>
+
+</body>
+</html>

@@ -44,26 +44,12 @@
     </a>
   </li>
 
-  <!-- Sección Reservas -->
+  <!--  Reservas -->
   <li class="nav-item {% if request.resolver_match.url_name == 'listado_reservas' %}active{% endif %}">
-    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseReservas"
-      aria-expanded="true" aria-controls="collapseReservas">
-      <i class="fas fa-calendar-alt"></i>
+    <a class="nav-link" href="{% url 'reservas:listado_reservas' %}">
+      <i class="fas fa-fw fa-calendar-alt"></i>
       <span>Reservas</span>
     </a>
-    <div id="collapseReservas" class="collapse" aria-labelledby="headingReservas" data-bs-parent="#accordionSidebar">
-      <div class="bg-white py-2 collapse-inner rounded">
-        <a class="collapse-item" href="{% url 'reservas:listado_reservas' %}">
-          <i class="fas fa-list"></i> Activas
-        </a>
-        <a class="collapse-item" href="{% url 'reservas:reservas_eliminadas' %}">
-          <i class="fas fa-trash-alt"></i> Canceladas
-        </a>
-        <a class="collapse-item" href="{% url 'reservas:crear' %}">
-          <i class="fas fa-plus-circle"></i> Nueva
-        </a>
-      </div>
-    </div>
   </li>
 
   <!-- Facturación -->
