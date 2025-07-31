@@ -17,11 +17,12 @@
                         <label for="cliente-autocomplete" class="form-label">Buscar Cliente</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" id="cliente-autocomplete" class="form-control" placeholder="Ingrese nombre o DNI"
+                            <input type="text" id="cliente-autocomplete" class="form-control"
+                                placeholder="Ingrese nombre o DNI"
                                 value="{{ form.instance.cliente.get_nombre_completo }}" required>
                         </div>
-                        <input type="hidden" name="cliente" id="cliente-id" value="{{ form.instance.cliente.id }}">
-
+                        <input type="hidden" name="cliente" id="cliente-id" value="{{ form.instance.cliente.id }}"
+                            required>
                     </div>
                     <div class="col-12 col-md-4 d-grid align-self-end">
                         <label class="form-label invisible">.</label>
@@ -65,7 +66,16 @@
                 <div class="text-danger small">{{ form.habitacion.errors.0 }}</div>
                 {% endif %}
             </div>
-
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_cantidad_adultos" class="form-label">Adultos</label>
+                    {{ form.cantidad_adultos|add_class:"form-control" }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="id_cantidad_niños" class="form-label">Niños</label>
+                    {{ form.cantidad_ninos|add_class:"form-control" }}
+                </div>
+            </div>
             <div class="mb-3">
                 <label for="id_informacion_adicional" class="form-label">Información adicional</label>
                 <div class="input-group">
@@ -100,51 +110,12 @@
         </form>
     </div>
 </div>
+{% include 'reservas/modal_nuevo_cliente.html' %}
 
-<!-- Modal para nuevo cliente -->
-<div class="modal fade" id="nuevoClienteModal" tabindex="-1" aria-labelledby="nuevoClienteModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="form-nuevo-cliente" method="post">
-                {% csrf_token %}
-                <div class="modal-header">
-                    <h5 class="modal-title" id="nuevoClienteModalLabel">Nuevo Cliente</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Aquí debes incluir los campos del modelo Cliente -->
-                    <div class="mb-3">
-                        <label for="nombre_cliente" class="form-label">Nombre</label>
-                        <input type="text" name="nombre" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="apellido_cliente" class="form-label">Apellido</label>
-                        <input type="text" name="apellido" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="dni_cliente" class="form-label">DNI</label>
-                        <input type="text" name="dni" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="telefono_cliente" class="form-label">Teléfono</label>
-                        <input type="text" name="telefono" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label for="email_cliente" class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Guardar Cliente</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
+
 <script>
     // Autocompletar cliente
     $(function () {
@@ -158,6 +129,16 @@
             }
         });
     });
+
+    //Validación para requerir selección de cliente
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const clienteId = document.getElementById('cliente-id').value;
+        if (!clienteId) {
+            e.preventDefault();
+            alert('Debes seleccionar o registrar un cliente antes de guardar la reserva.');
+        }
+    });
+
 
     // Actualizar habitaciones disponibles
     function actualizarHabitaciones() {

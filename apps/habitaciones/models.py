@@ -20,6 +20,8 @@ class Habitacion(models.Model):
     costo_diario = models.DecimalField(max_digits=10, decimal_places=2)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='disponible')
     caracteristicas = models.TextField(blank=True)
+    capacidad_personas = models.PositiveIntegerField(default=2) 
 
     def __str__(self):
         return f"Habitación {self.numero} ({self.get_tipo_display()})"
+

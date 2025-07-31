@@ -50,6 +50,26 @@
                 </div>
             </div>
             {% endif %}
+            {% if reserva.huespedes.exists %}
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h6 class="text-primary"><i class="fas fa-users"></i> Huéspedes registrados</h6>
+                    <ul class="list-group">
+                        {% for h in reserva.huespedes.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>
+                                {{ h.nombre }} {{ h.apellido }} - DNI: {{ h.dni }}
+                                {% if h.fecha_nacimiento %}
+                                <small class="text-muted">(Nac: {{ h.fecha_nacimiento|date:"d/m/Y" }})</small>
+                                {% endif %}
+                            </span>
+                            <span class="text-muted small">{{ h.telefono|default:"-" }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <div class="card-footer d-flex justify-content-between flex-wrap gap-2">
@@ -67,7 +87,7 @@
                     <i class="fas fa-edit"></i> Editar
                 </a>
                 <a href="{% url 'reservas:eliminar' reserva.id %}" class="btn btn-outline-danger"
-                   onclick="return confirm('¿Estás seguro de cancelar esta reserva?')">
+                    onclick="return confirm('¿Estás seguro de cancelar esta reserva?')">
                     <i class="fas fa-trash"></i> Cancelar Reserva
                 </a>
             </div>

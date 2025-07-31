@@ -1,3 +1,4 @@
+#reservas/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_GET
 from django.contrib.auth.decorators import login_required
@@ -8,18 +9,26 @@ from django.db.models import Q
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from datetime import datetime
-
 from apps.habitaciones.models import Habitacion
 from apps.clientes.models import Cliente
 from .models import Reserva
 from .forms import ReservaForm
 from apps.facturacion.utils import generar_factura 
+from apps.huespedes.models import Huesped
+from django.views.decorators.http import require_POST
+from django.db import transaction
+from apps.habitaciones.utils import habitaciones_disponibles
 
 # Crear una nueva reserva
 @login_required
+@transaction.atomic
 def crear_reserva(request):
     if request.method == 'POST':
-        form = ReservaForm(request.POST)
+        fecha_entrada = request.POST.get('fecha_entrada')
+        fecha_salida = request.POST.get('fecha_salida')
+
+        form = ReservaForm(request.POST, fecha_entrada=fecha_entrada, fecha_salida=fecha_salida)
+
         if form.is_valid():
             reserva = form.save(commit=False)
             cliente_id = request.POST.get('cliente')
@@ -27,16 +36,17 @@ def crear_reserva(request):
                 reserva.cliente = Cliente.objects.get(id=cliente_id, eliminado=False)
             except Cliente.DoesNotExist:
                 messages.error(request, 'El cliente seleccionado no existe.')
-                return render(request, 'reservas/form.html', {'form': form, 'accion': 'Nueva'})
-            reserva.creado_por = request.user
-            reserva.modificado_por = request.user
-            reserva.save()
-            messages.success(request, 'Reserva guardada correctamente.')
-            return redirect('reservas:listado_reservas')
-        messages.error(request, 'Corrige los errores del formulario.')
+                return render(request, 'reservas/form.html', {'form': form})
+    
+        reserva.creado_por = request.user
+        reserva.modificado_por = request.user
+        reserva.save()
+        form.save_m2m()
+        messages.success(request, "Reserva registrada exitosamente.")
+        return redirect('reservas:listado_reservas')
     else:
         form = ReservaForm()
-    return render(request, 'reservas/form.html', {'form': form, 'accion': 'Nueva'})
+    return render(request, 'reservas/form.html', {'form': form})
 
 # Editar una reserva
 @login_required
@@ -145,6 +155,49 @@ def buscar_cliente(request):
     } for c in clientes]
     return JsonResponse(resultados, safe=False)
 
+@require_POST
+@login_required
+def crear_huesped_ajax(request):
+    data = request.POST
+    try:
+        nuevo = Huesped.objects.create(
+            nombre=data.get('nombre'),
+            apellido=data.get('apellido'),
+            dni=data.get('dni'),
+            fecha_nacimiento=data.get('fecha_nacimiento'),
+            direccion=data.get('direccion'),
+            telefono=data.get('telefono'),
+            creado_por=request.user,
+            modificado_por=request.user
+        )
+        return JsonResponse({
+            'success': True,
+            'id': nuevo.id,
+            'text': f"{nuevo.nombre} {nuevo.apellido} ({nuevo.dni})"
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@login_required
+def buscar_huesped(request):
+    term = request.GET.get('term', '')
+    huespedes = Huesped.objects.filter(
+        eliminado=False,
+        dni__icontains=term
+    ) | Huesped.objects.filter(
+        eliminado=False,
+        nombre__icontains=term
+    ) | Huesped.objects.filter(
+        eliminado=False,
+        apellido__icontains=term
+    )
+
+    data = [
+        {'id': h.id, 'nombre': h.nombre, 'apellido': h.apellido, 'dni': h.dni}
+        for h in huespedes.distinct()[:10]
+    ]
+    return JsonResponse(data, safe=False)
+
 # AJAX: Habitaciones disponibles
 @require_GET
 @login_required
@@ -174,6 +227,20 @@ def habitaciones_disponibles(request):
 
     return JsonResponse(list(disponibles), safe=False)
 
+def obtener_habitaciones_disponibles(request):
+    fecha_entrada = request.GET.get('fecha_entrada')
+    fecha_salida = request.GET.get('fecha_salida')
+
+    if fecha_entrada and fecha_salida:
+        disponibles = habitaciones_disponibles(fecha_entrada, fecha_salida)
+        data = [
+            {
+                'id': hab.id,
+                'texto': f"{hab.numero} - {hab.tipo} (Gs. {hab.costo_diario})"
+            } for hab in disponibles
+        ]
+        return JsonResponse({'habitaciones': data})
+    return JsonResponse({'habitaciones': []})
 
 @login_required
 def reservas_eliminadas(request):
@@ -210,36 +277,67 @@ def reservas_eliminadas(request):
     })
 
 @login_required
-def realizar_check_in(request, pk):
+@transaction.atomic
+def checkin(request, pk):
     reserva = get_object_or_404(Reserva, pk=pk, eliminado=False)
-    if reserva.estado == 'reservado':
+
+    if reserva.estado != 'reservado':
+        messages.warning(request, 'La reserva debe estar en estado "reservado" para realizar el check-in.')
+        return redirect('reservas:detalle', pk=pk)
+
+    if request.method == 'POST':
+        adultos = int(request.POST.get('adultos', 1))
+        ninos = int(request.POST.get('ninos', 0))
+        huespedes_ids = request.POST.getlist('huespedes')
+
+        reserva.adultos = adultos
+        reserva.ninos = ninos
         reserva.estado = 'ocupado'
         reserva.habitacion.estado = 'ocupada'
         reserva.modificado_por = request.user
         reserva.save()
         reserva.habitacion.save()
-        messages.success(request, 'Check-in realizado correctamente. La habitación está ahora ocupada.')
+
+        # Asociar huéspedes seleccionados
+        reserva.huespedes.clear()
+        for h_id in huespedes_ids:
+            try:
+                huesped = Huesped.objects.get(pk=h_id, eliminado=False)
+                reserva.huespedes.add(huesped)
+            except Huesped.DoesNotExist:
+                continue
+
+        messages.success(request, 'Check-in realizado correctamente.')
+        return redirect('reservas:detalle', pk=reserva.pk)
+
     else:
-        messages.warning(request, 'La reserva no se encuentra en estado "reservado".')
-    return redirect('reservas:listado_reservas')
+        # Prellenar adultos y niños desde la reserva (si existieran)
+        adultos = reserva.adultos or 1
+        ninos = reserva.ninos or 0
 
-@login_required
-def realizar_check_out(request, pk):
-    reserva = get_object_or_404(Reserva, pk=pk, eliminado=False)
-    if reserva.estado == 'ocupado':
-        reserva.estado = 'finalizado'
-        reserva.habitacion.estado = 'disponible'
-        reserva.modificado_por = request.user
-        reserva.save()
-        reserva.habitacion.save()
+        # Cargar cliente como huésped si no está en la lista aún
+        if not reserva.huespedes.filter(dni=reserva.cliente.dni).exists():
+            huesped, creado = Huesped.objects.get_or_create(
+                dni=reserva.cliente.dni,
+                defaults={
+                    'nombre': reserva.cliente.nombre,
+                    'apellido': reserva.cliente.apellido,
+                    'telefono': reserva.cliente.telefono,
+                    'direccion': '',
+                    'fecha_nacimiento': None,
+                    'creado_por': request.user,
+                    'modificado_por': request.user
+                }
+            )
+            reserva.huespedes.add(huesped)
 
-        # Lógica para generar factura (debes tener esto implementado)
-        generar_factura(reserva, usuario=request.user)
+        return render(request, 'reservas/checkin.html', {
+            'reserva': reserva,
+            'huespedes': reserva.huespedes.all(),
+            'adultos': adultos,
+            'ninos': ninos,
+        })
 
-        messages.success(request, 'Check-out realizado. La habitación está disponible y se generó la factura.')
-    else:
-        messages.warning(request, 'La reserva no está en estado "ocupado".')
-    return redirect('reservas:listado_reservas')
 
 @login_required
 def checkout(request, pk):

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Check-In - Hotel Estancia Itapúa{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center">
+    <div class="card shadow p-4 mt-4 mb-5" style="width: 100%; max-width: 720px;">
+        <h1 class="h4 text-gray-800 mb-4 text-center">Check-In de Reserva</h1>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Cliente -->
+            <div class="mb-3">
+                <label class="form-label">Cliente</label>
+                <input type="text" class="form-control" value="{{ reserva.cliente.get_nombre_completo }}" readonly>
+            </div>
+
+            <!-- Adultos y Niños -->
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="id_adultos" class="form-label">Adultos</label>
+                    <input type="number" min="0" name="adultos" id="id_adultos" class="form-control" value="{{ adultos }}">
+                </div>
+                <div class="col">
+                    <label for="id_ninos" class="form-label">Niños</label>
+                    <input type="number" min="0" name="ninos" id="id_ninos" class="form-control" value="{{ ninos }}">
+                </div>
+            </div>
+
+            <!-- Huéspedes -->
+            <div class="mb-3">
+                <label for="huespedes" class="form-label">Huéspedes adicionales</label>
+                <select name="huespedes" id="huespedes" class="form-control" multiple>
+                    {% for h in huespedes %}
+                        <option value="{{ h.id }}" selected>{{ h.nombre }} {{ h.apellido }} ({{ h.dni }})</option>
+                    {% endfor %}
+                </select>
+                <small class="form-text text-muted">Puede buscar y seleccionar varios.</small>
+            </div>
+
+            <!-- Botón para abrir modal -->
+            <div class="mb-3">
+                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                    data-bs-target="#modalNuevoHuesped">
+                    <i class="fas fa-user-plus"></i> Nuevo Huésped
+                </button>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'reservas:listado_reservas' %}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Confirmar Check-In</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% include 'reservas/modal_nuevo_huesped.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Inicializar Select2 con AJAX para búsqueda de huéspedes
+    $('#huespedes').select2({
+        ajax: {
+            url: '{% url "reservas:buscar_huesped" %}',
+            dataType: 'json',
+            delay: 250,
+            data: params => ({ term: params.term }),
+            processResults: data => ({
+                results: data.map(item => ({
+                    id: item.id,
+                    text: `${item.nombre} ${item.apellido} (${item.dni})`
+                }))
+            })
+        },
+        minimumInputLength: 2,
+        placeholder: 'Buscar huésped...',
+        width: '100%'
+    });
+
+    // Agregar huésped desde modal
+    $('#formNuevoHuesped').on('submit', function (e) {
+        e.preventDefault();
+        const form = $(this);
+        const url = "{% url 'reservas:crear_huesped_ajax' %}";
+        $.post(url, form.serialize())
+            .done(function (resp) {
+                if (resp.success) {
+                    const option = new Option(resp.text, resp.id, true, true);
+                    $('#huespedes').append(option).trigger('change');
+                    $('#modalNuevoHuesped').modal('hide');
+                    form[0].reset();
+                } else {
+                    alert("Error: " + resp.error);
+                }
+            })
+            .fail(() => alert("Error en la comunicación con el servidor"));
+    });
+</script>
+{% endblock %}

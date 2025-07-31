@@ -1,16 +1,21 @@
+# reservas/models.py
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from apps.clientes.models import Cliente
 from apps.habitaciones.models import Habitacion
+from apps.huespedes.models import Huesped
+
 
 class ReservaQuerySet(models.QuerySet):
     def activas(self):
         return self.filter(eliminado=False)
 
+
 class ReservaManager(models.Manager):
     def get_queryset(self):
         return ReservaQuerySet(self.model, using=self._db).activas()
+
 
 class Reserva(models.Model):
     ESTADOS = [
@@ -28,6 +33,16 @@ class Reserva(models.Model):
     informacion_adicional = models.TextField(blank=True, null=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='reservado')
 
+    cantidad_adultos = models.PositiveIntegerField(default=1)
+    cantidad_ninos = models.PositiveIntegerField(default=0)
+
+    huespedes = models.ManyToManyField(
+        Huesped,
+        through='ReservaHuesped',
+        related_name='reservas',
+        blank=True
+    )
+
     # Auditoría
     creado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -44,7 +59,6 @@ class Reserva(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     modificado_en = models.DateTimeField(auto_now=True)
 
-    # Soft delete
     eliminado = models.BooleanField(default=False)
 
     # Managers
@@ -71,6 +85,13 @@ class Reserva(models.Model):
         if self.fecha_salida <= self.fecha_entrada:
             raise ValidationError("La fecha de salida debe ser posterior a la fecha de entrada.")
 
+        total_personas = self.cantidad_adultos + self.cantidad_ninos
+        if self.habitacion and total_personas > self.habitacion.capacidad_personas:
+            raise ValidationError(
+                f"La habitación seleccionada admite hasta {self.habitacion.capacidad_personas} personas. "
+                f"Está intentando reservar para {total_personas}."
+            )
+
     def save(self, *args, **kwargs):
         self.full_clean()
 
@@ -84,7 +105,7 @@ class Reserva(models.Model):
             self.habitacion.estado = 'ocupada'
             self.habitacion.save()
         elif self.estado == 'finalizado':
-            self.habitacion.estado = 'disponible'
+            self.habitacion.estado = 'en_transaccion'
             self.habitacion.save()
 
     @property
@@ -93,3 +114,9 @@ class Reserva(models.Model):
 
     def __str__(self):
         return f"Reserva de {self.cliente} - Habitación {self.habitacion.numero}"
+
+
+class ReservaHuesped(models.Model):
+    reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE, related_name='huespedes_reserva')
+    huesped = models.ForeignKey(Huesped, on_delete=models.PROTECT)
+    tipo = models.CharField(max_length=10, choices=[('adulto', 'Adulto'), ('nino', 'Niño')])

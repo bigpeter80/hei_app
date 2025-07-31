@@ -1,3 +1,4 @@
+#reservas/urls.py
 from django.urls import path
 from . import views
 
@@ -14,6 +15,9 @@ urlpatterns = [
     path('buscar-cliente/', views.buscar_cliente, name='buscar_cliente'),
     path('habitaciones-disponibles/', views.habitaciones_disponibles, name='habitaciones_disponibles'),
     path('eliminadas/', views.reservas_eliminadas, name='reservas_eliminadas'),
-    path('check-in/<int:pk>/', views.realizar_check_in, name='check_in'),
-    path('check-out/<int:pk>/', views.realizar_check_out, name='check_out'),
+    path('check-in/<int:pk>/', views.checkin, name='check_in'),
+    path('check-out/<int:pk>/', views.checkout, name='check_out'),
+    path('buscar-huesped/', views.buscar_huesped, name='buscar_huesped'),
+    path('crear-huesped/', views.crear_huesped_ajax, name='crear_huesped_ajax'),
+    path('ajax/habitaciones-disponibles/', views.obtener_habitaciones_disponibles, name='ajax_habitaciones_disponibles'),
 ]

@@ -65,13 +65,7 @@
                 <td>{{ reserva.dias_reserva }}</td>
                 <td>Gs. {{ reserva.costo_total|floatformat:0|intcomma }}</td>
                 <td>Gs. {{ reserva.deposito|floatformat:0|intcomma }}</td>
-                <td>
-                    {% if not reserva.eliminado %}
-                    <span class="badge bg-success">Activa</span>
-                    {% else %}
-                    <span class="badge bg-secondary">Cancelada</span>
-                    {% endif %}
-                </td>
+                <td>{{ reserva.estado }}</td>
                 <td class="text-nowrap">
                     <a href="{% url 'reservas:detalle' reserva.id %}" class="btn btn-sm btn-outline-info"
                         title="Ver Detalle">

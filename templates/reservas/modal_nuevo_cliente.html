@@ -1,0 +1,41 @@
+<!-- Modal para nuevo cliente -->
+<div class="modal fade" id="nuevoClienteModal" tabindex="-1" aria-labelledby="nuevoClienteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="form-nuevo-cliente" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nuevoClienteModalLabel">Nuevo Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Aquí debes incluir los campos del modelo Cliente -->
+                    <div class="mb-3">
+                        <label for="nombre_cliente" class="form-label">Nombre</label>
+                        <input type="text" name="nombre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="apellido_cliente" class="form-label">Apellido</label>
+                        <input type="text" name="apellido" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dni_cliente" class="form-label">DNI</label>
+                        <input type="text" name="dni" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefono_cliente" class="form-label">Teléfono</label>
+                        <input type="text" name="telefono" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email_cliente" class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Guardar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
