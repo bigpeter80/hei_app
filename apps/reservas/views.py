@@ -37,13 +37,14 @@ def crear_reserva(request):
             except Cliente.DoesNotExist:
                 messages.error(request, 'El cliente seleccionado no existe.')
                 return render(request, 'reservas/form.html', {'form': form})
-    
-        reserva.creado_por = request.user
-        reserva.modificado_por = request.user
-        reserva.save()
-        form.save_m2m()
-        messages.success(request, "Reserva registrada exitosamente.")
-        return redirect('reservas:listado_reservas')
+
+            reserva.creado_por = request.user
+            reserva.modificado_por = request.user
+            reserva.save()
+            form.save_m2m()
+            messages.success(request, "Reserva registrada exitosamente.")
+            return redirect('reservas:listado_reservas')
+
     else:
         form = ReservaForm()
     return render(request, 'reservas/form.html', {'form': form})
@@ -290,8 +291,8 @@ def checkin(request, pk):
         ninos = int(request.POST.get('ninos', 0))
         huespedes_ids = request.POST.getlist('huespedes')
 
-        reserva.adultos = adultos
-        reserva.ninos = ninos
+        reserva.cantidad_adultos = adultos
+        reserva.cantidad_ninos = ninos
         reserva.estado = 'ocupado'
         reserva.habitacion.estado = 'ocupada'
         reserva.modificado_por = request.user
@@ -312,8 +313,8 @@ def checkin(request, pk):
 
     else:
         # Prellenar adultos y niños desde la reserva (si existieran)
-        adultos = reserva.adultos or 1
-        ninos = reserva.ninos or 0
+        adultos = reserva.cantidad_adultos or 1
+        ninos = reserva.cantidad_ninos or 0
 
         # Cargar cliente como huésped si no está en la lista aún
         if not reserva.huespedes.filter(dni=reserva.cliente.dni).exists():
